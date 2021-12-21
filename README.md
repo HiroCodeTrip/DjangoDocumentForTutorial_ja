@@ -54,6 +54,11 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 ]
 ```
+
+http://127.0.0.1:8000/polls/
+にアクセスしたときpolls/urlsファイルにいく。
+この時点でpolls/urlsは作成しよう。
+
 - polls/urls.py
 
 ```
@@ -65,6 +70,8 @@ urlpatterns = [
     path('', views.index, name='index'),
 ]
 ```
+http://127.0.0.1:8000/polls/
+にアクセスしたときにindex関数を表示する。
 
 - polls/views.py
 
@@ -75,6 +82,8 @@ def index(request):
     return HttpResponse("Hello, world. You're at the polls index.")
 ```
 
+index関数の中身として
+"Hello, world. You're at the polls index."と表示する
 
 
 
