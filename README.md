@@ -80,7 +80,7 @@ urlpatterns = [
 
 
 index関数の中身として
-"Hello, world. You're at the polls index."と表示する
+"Hello, world. You're at the polls index."と表示させる
 
 ```
 from django.http import HttpResponse
@@ -100,7 +100,7 @@ def index(request):
 
 > モデルの作成
 
-これから開発する簡単な poll アプリケーションでは、Question と Choice の2つのモデルを作成します。Question　モデルには question と publication date という属性（カラム）が存在しがあり、Choice モデルには text of the choice と vote という2つのフィールドがあります。また　生成された各　Choice（選択肢） は Question（質問） に関連づけられています。
+これから開発する簡単な poll アプリケーションでは、Question と Choice の2つのモデルを作成します。Question　モデルには question と publication date という属性（カラム）が存在しがあり、Choice モデルには text of the choice と vote と　参照先を指定するquestion という3つのフィールドがあります。また　生成された各　Choice（選択肢） は Question（質問） に関連づけられています。
 
     
 ```
@@ -128,3 +128,30 @@ SET_NULL:削除した際に参照している子モデルの値はNULLになる
 PROTECT:参照している子モデルがあると親要素を削除できない
 DO_NOTHING:何もしない
 SET():独自の処理を設定できる
+
+> モデルを有効にする
+
+さて上記に書いたコードだけでdjangoは以下のことができるようになります。
+- アプリケーションのデータベーススキーマを作成 (CREATE TABLE 文を実行) 
+- Question や Choice に Python からアクセスするためのデータベース API を作成
+
+ですがここで忘れてはいけないことがあります。ここではまだpollsアプリケーションを作成したことをプロジェクトに教えてあげていません。
+
+まずはアプリケーションをプロジェクトに含めるためにmysite/settings.pyファイルのINSTALLED_APPS設定にpolls.apps.PollsConfigと追加してあげましょう。
+(PollsConfigクラスはpollsディレクトリの下にあるappsファイルの中にあるPollsConfigクラスを指しています。）
+```
+INSTALLED_APPS = [
+    'polls.apps.PollsConfig', #pollsとしても良いです
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+]
+```
+? :INSTALLED_APPS設定には、アプリケーション構成クラスを直接指定するか、 使用するパッケージを設定することになってます。なのでpollsとしても良いし、polls.apps.PollsConfigとしても良いです。
+
+これで Django は、pollsアプリケーションが含まれていることを認識できます。
+
+もうひとつコマンドを実行しましょう:
