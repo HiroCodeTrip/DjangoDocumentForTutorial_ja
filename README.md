@@ -110,13 +110,15 @@ from django.db import models
 
 class Question(models.Model):
     question_text = models.CharField(max_length=200)
-    pub_date = models.DateTimeField("date published")
+    pub_date = models.DateTimeField("date published")　#verbose_nameを設定している。
 
 class Choice(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE) #CASCADE->関連するモデルもすべて削除する処理　質問(Question)が消されたら当然選択肢(Choice)も消える
     choice_text = models.CharField(max_length=200)
     votes = models.IntegerField(default=0)
 ```
+上記のコードにおいてpub_date = models.DateTimeField("date published")とありますが、
+これを指定することにより管理画面におけるモデル名の表示内容が変わります。pub_dateなど開発者以外に分かりにくい名前をこうすることで分かりやすい名前に整形することができます。またverbose_nameはClass Metaでも設定できます。
 
 また参照されたモデルを削除する際に紐ついている関連モデルをどうしたいかをon_deleteで指定するがon_deleteのパターンは以下のとおりである。
 
@@ -154,4 +156,89 @@ INSTALLED_APPS = [
 
 これで Django は、pollsアプリケーションが含まれていることを認識できます。
 
-もうひとつコマンドを実行しましょう:
+もうひとつコマンドを実行しましょう
+
+- powershell
+`py manage.py makemigrations polls`
+
+これを実行することでDjangoにモデルの変更（新しいモデルを作成した）があったことを伝え、migrationsディレクトリに新たなデータベーススキーマの定義を保存することができました。
+
+さてでは具体的にmigrationsディレクトリに生成されたファイルはどのようなsql文を実行するのでしょうか？一旦覗いてみましょう。
+ここではsqlmigrateコマンドを使用し中身をどんなsql文が実行されているのかを表示してみます。sqlコマンドはマイグレーションファイル(migrationsディレクトリ配下にあるファイル群）の名前を引数に取りsql文を返します。
+
+- powershell
+ 
+`py manage.py sqlmigrate polls 0001`
+
+
+- 表示された内容
+```
+BEGIN;
+--
+-- Create model Question
+--
+CREATE TABLE "polls_question" 
+    ("id" integer NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "question_text" varchar(200) NOT NULL, 
+    "pub_date" datetime NOT NULL);
+--
+-- Create model Choice
+--
+CREATE TABLE "polls_choice" 
+    ("id" integer NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "choice_text" varchar(200) NOT NULL,
+    "votes" integer NOT NULL, 
+    "question_id" bigint NOT NULL REFERENCES "polls_question" ("id") DEFERRABLE        INITIALLY DEFERRED);
+CREATE INDEX "polls_choice_question_id_c5b4b260" ON "polls_choice" ("question_id");
+
+COMMIT;
+```
+さて上記のコードですがいくつか気になるところは見つかりましたか？
+以下に幾つかの気を付けるべきところを書き記したいと思います。
+1. テーブル名はアプリケーションの名前（Polls)とモデルの名前を結合して生成されます。(ex.polls_question)
+2. 主キー(primary key,ID)は自動に追加されます。#idというフィールドが自動的に作られる。
+3. 便宜上djangoは外部キーフィールド名に`_id`と追加します。(ex.question_id)
+4. DEFERABLEの部分は外部キーの処理がトランザクション終了までに実行されないことを定義しています。
+5. sqlmigrateコマンドは生成されたsqlをスクリーンに表示するだけのコマンドです。djangoが何をしようとしているか確認したり、何かしらの形でsql文が必要になったときに役立ちます。
+
+もし興味があれば `py manage.py check`を実行してみることも出来ます。これはマイグレーションを作成したりデータベースにふれることなくプロジェクトに問題があるかを確認する際に役立ちます。問題がない場合は以下のように表示されます。
+
+- 表示される内容
+`System check identified no issues (0 silenced).`
+
+さてではもう一度migrateコマンドを実行してモデルのテーブルをデータベースに更新しましょう。
+- powershell
+`py manage.py migrate`
+
+-　表示された内容
+```Operations to perform:
+  Apply all migrations: admin, auth, contenttypes, polls, sessions
+Running migrations:
+  Applying polls.0001_initial... OK
+ ```
+どうでしょうか無事にpolls.0001_initial.pyをデータベースに更新することはできましたか？
+makemigrationsコマンドとmigrateコマンドの理解は難しいと思いますがここでは
+
+- makemigrationsコマンド
+models.py に新たに追加した内容をmigrationsディレクトリ下にファイルとしてあらたにスキーマを定義する。
+- migrateコマンド
+migrationsディレクトリ下にあるファイルを参照しデータベース(sqliteデータベース、この場合は .\db.sqlite3ファイル)に更新する。
+
+という風に考えましょう。
+
+つまり以下の三ステップをおぼえれば大丈夫という事です！
+- モデルを変更する (models.py の中の)
+- マイグレーションを作成するために python manage.py makemigrations を実行する
+- データベースにこれらの変更を適用するために python manage.py migrate を実行する
+
+> APIで遊んでみる
+さてこの章では
+> データベースを有効にする
+にあった
+- Question や Choice に Python からアクセスするためのデータベース API を作成
+の部分を使用し、Django が提供する API で遊んでみましょう。
+
+さてではPython対話シェルを起動し始めていきましょう。
+- powershell
+`py manage.py shell`
+なぜ`python`をタイプして起動するのではなく`py manage.py shell`を使用しているのかについては、django_settings_modeule関数を設定しているからです。
