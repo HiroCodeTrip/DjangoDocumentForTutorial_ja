@@ -241,4 +241,49 @@ migrationsディレクトリ下にあるファイルを参照しデータベー�
 さてではPython対話シェルを起動し始めていきましょう。
 - powershell
 `py manage.py shell`
-なぜ`python`をタイプして起動するのではなく`py manage.py shell`を使用しているのかについては、django_settings_modeule関数を設定しているからです。
+なぜ`python`をタイプして起動するのではなく`py manage.py shell`を使用しているのかについてはmanage.py が DJANGO_SETTINGS_MODULE 環境変数を設定してくれるからです。これにより、 Django に mysite/settings.py ファイルへの import パスが与えられます。
+
+まあともかくこれによりデータベースAPIを使用することができるようになりましたね
+
+ではどんどんコマンドを入力してみてDjangoデータベースAPIに慣れていきましょう。
+
+-　powershell
+
+```
+>>> from polls.models import Choice, Question  # 先ほどmodels.pyで作成したモデルをimportしています。
+
+# まだ(Question)質問はないのでモデルにレコードは存在していませんね。
+>>> Question.objects.all()
+<QuerySet []>
+
+# では新たな質問（Question)を作成してみましょう！
+# タイムゾーン設定はデフォルトでセッティングファイルで有効になっているので
+# Djangoではdatetimeであるpub_dateはtzinfoオブジェクトとして取得されます。timezone.now()を使いましょう。
+# datetime.datetime.now()と同じ動きをするのでこれを使ってくださいね。
+>>> from django.utils import timezone
+>>> q = Question(question_text="What's new?", pub_date=timezone.now())
+
+# Save the object into the database. You have to call save() explicitly.
+>>> q.save()
+
+# Now it has an ID.
+>>> q.id
+1
+
+# Access model field values via Python attributes.
+>>> q.question_text
+"What's new?"
+>>> q.pub_date
+datetime.datetime(2012, 2, 26, 13, 0, 0, 775217, tzinfo=<UTC>)
+
+# Change values by changing the attributes, then calling save().
+>>> q.question_text = "What's up?"
+>>> q.save()
+
+# objects.all() displays all the questions in the database.
+>>> Question.objects.all()
+<QuerySet [<Question: Question object (1)>]>
+```
+
+
+
