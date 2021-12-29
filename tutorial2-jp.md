@@ -322,7 +322,7 @@ True
 ```
 
 モデルの関係などについては詳細としてこれを読んでね↓
-For more information on model relations, see [Accessing related objects][https://docs.djangoproject.com/en/4.0/ref/models/relations/]. For more on how to use double underscores to perform field lookups via the API, see [Field lookups][https://docs.djangoproject.com/en/4.0/topics/db/queries/#field-lookups-intro]. For full details on the database API, see our [Database API reference][https://docs.djangoproject.com/en/4.0/topics/db/queries/].
+For more information on model relations, see [Accessing related objects](https://docs.djangoproject.com/en/4.0/ref/models/relations/). For more on how to use double underscores to perform field lookups via the API, see [Field lookups](https://docs.djangoproject.com/en/4.0/topics/db/queries/#field-lookups-intro). For full details on the database API, see our [Database API reference](https://docs.djangoproject.com/en/4.0/topics/db/queries/).
 
 > Django Adminの紹介
 
