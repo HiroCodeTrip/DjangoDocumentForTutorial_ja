@@ -1,5 +1,5 @@
 
-# はじめての Django アプリ作成、その2
+# はじめての Django アプリ作成、その2 データベースとadmin
 
 > Database の設定
 - powershell
