@@ -126,7 +126,63 @@ def results(request, question_id):
 ```
 ブラウザで /polls/1/ を表示して投票してみましょう。
 票を入れるたびに、結果のページが更新されていることがわかるはずです。選択肢を選ばずにフォームを送信すると、エラーメッセージを表示されるはずです。
+**競合状態について**
+これまで作ってきた vote() ビューのコードは、小さな問題を抱えています。最初にデータベースから selected_choice オブジェクトを取得し、そこで votes の新しい値を計算し、データベースにそれを戻して保存します。もしウェブサイトのユーザー 2 人が まったく同時に 投票しようとすると、誤りが発生します。votes の元の値が 42 だったとしましょう。その時、両方のユーザーに対して新しい値として 43 が計算され保存されます、しかし 44 が本来想定される値です。
 
+この問題は、「競合状態」と呼ばれています。この問題に興味がある人は、[Avoiding race conditions using F()](https://docs.djangoproject.com/ja/4.0/ref/models/expressions/#avoiding-race-conditions-using-f) を読むと、この問題の解決方法がわかります。
+
+> 汎用ビューを使う: コードが少ないのはいいことだ
+
+detail() ( チュートリアルその 3 ) と results() ビューはとても簡単で、先程も述べたように冗長です。
+投票の一覧を表示する index() ビューも同様です。
+
+These views represent a common case of basic web development: getting data from the database according to a parameter passed in the URL, loading a template and returning the rendered template. Because this is so common, Django provides a shortcut, called the "generic views" system.
+
+汎用ビュー(generic view)とは、よくあるパターンを抽象化して、 Python コードすら書かずにアプリケーションを書き上げられる状態にしたものです。
+
+これまで作成してきた poll アプリを汎用ビューシステムに変換して、 コードをばっさり捨てられるようにしましょう。変換にはほんの数ステップしかか かりません。そのステップは:
+
+URLconf を変換する。
+古い不要なビューを削除する。
+新しいビューに Djangoの汎用ビューを設定する。
+詳しく見てゆきましょう。
+
+**なぜコードを入れ換えるの？**
+一般に Django アプリケーションを書く場合は、まず自分の問題を解決するために汎用ビューが適しているか考えた上で、最初から汎用ビューを使い、途中まで書き上げたコードをリファクタすることはありません。ただ、このチュートリアルでは中核となるコンセプトに焦点を合わせるために、わざと「大変な」ビューの作成に集中してもらったのです。
+
+電卓を使う前に、算数の基本を知っておかねばならないのと同じです。
+    
+> URLconf の修正
+
+まず、 URLconf の polls/urls.py を開き、次のように変更します:
+
+- polls/urls.py
+```
+    from django.urls import path
+
+from . import views
+
+app_name = 'polls'
+urlpatterns = [
+    path('', views.IndexView.as_view(), name='index'),
+    path('<int:pk>/', views.DetailView.as_view(), name='detail'),
+    path('<int:pk>/results/', views.ResultsView.as_view(), name='results'),
+    path('<int:question_id>/vote/', views.vote, name='vote'),
+]
+```
+2つ目と3つ目のパス文字列に一致するパターンの名前が <question_id> から <pk> に変更されたことに注意してください。
+
+> views の修正
+
+次に、古い index 、 detail 、と results のビューを削除し、代わりに Django の汎用ビューを使用します。
+これを行うには、 polls/views.py ファイルを開き、次のように変更します:
+- polls/views.py
+```
+
+```
+    
+```
+```
 ```
 ```
   
