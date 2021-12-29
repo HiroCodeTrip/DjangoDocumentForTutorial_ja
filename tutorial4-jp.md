@@ -1,4 +1,4 @@
-# はじめての Django アプリ作成、その 4
+# はじめての Django アプリ作成、その 4 フォームとテンプレートビュー(generic view)
 
 > 簡単なフォームを書く
 
@@ -158,7 +158,7 @@ URLconf を変換する。
 
 - polls/urls.py
 ```
-    from django.urls import path
+from django.urls import path
 
 from . import views
 
@@ -178,11 +178,71 @@ urlpatterns = [
 これを行うには、 polls/views.py ファイルを開き、次のように変更します:
 - polls/views.py
 ```
+from django.http import HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
+from django.views import generic
 
+from .models import Choice, Question
+
+
+class IndexView(generic.ListView):
+    template_name = 'polls/index.html'
+    context_object_name = 'latest_question_list'
+
+    def get_queryset(self):
+        """Return the last five published questions."""
+        return Question.objects.order_by('-pub_date')[:5]
+
+
+class DetailView(generic.DetailView):
+    model = Question
+    template_name = 'polls/detail.html'
+
+
+class ResultsView(generic.DetailView):
+    model = Question
+    template_name = 'polls/results.html'
+
+
+def vote(request, question_id):
+    ... # same as above, no changes needed.
 ```
-    
-```
-```
-```
-```
-  
+ここでは、ListView と DetailView を使用しています。
+これらのビューはそれぞれ、「オブジェクトのリストを表示する」および「あるタイプのオブジェクトの詳細ページを表示する」という二つの概念を抽象化しています。
+
+- 各汎用ビューは自分がどのモデルに対して動作するのか知っておく必要があります。これは、 model 属性を使用して提供されます。
+- DetailView 汎用ビューには、 "pk" という名前で URL からプライマリキーをキャプチャして渡すことになっているので、 汎用ビュー向けに question_id を pk に変更しています。
+
+
+デフォルトでは、 DetailView 汎用ビューは <app name>/<model name>_detail.html という名前のテンプレートを使います。
+
+この場合、テンプレートの名前は "polls/question_detail.html" です。
+
+template_name 属性を指定すると、自動生成されたデフォルトのテンプレート名ではなく、指定したテンプレート名を使うように Django に伝えることができます。
+
+また、 results リストビューにも template_name を指定します。
+
+これによって、 結果ビューと詳細ビューをレンダリングしたとき、（裏側ではどちらも DetailView ですが）それぞれ違った見た目になります。
+
+同様に、 ListView 汎用ビューは <app name>/<model name>_list.html というデフォルトのテンプレートを使うので、 template_name を使って ListView に既存の "polls/index.html" テンプレートを使用するように伝えます。
+
+このチュートリアルの前の部分では、 question や latest_question_list といったコンテキスト変数が含まれるコンテキストをテンプレートに渡していました。
+
+DetailView には question という変数が自動的に渡されます。
+
+なぜなら、 Django モデル (Question) を使用していて、 Django はコンテキスト変数にふさわしい名前を決めることができるからです。
+
+一方で、 ListView では、自動的に生成されるコンテキスト変数は question_list になります。
+
+これを上書きするには、 context_object_name 属性を与え、 latest_question_list を代わりに使用すると指定します。
+
+この代替アプローチとして、テンプレートのほうを変えて、新しいデフォルトのコンテキスト変数の名前と一致させることもできます。
+
+しかし、使用したい変数名を Django に伝えるだけのほうが簡単でしょう。
+
+サーバを実行して、新しく汎用ビューベースにした投票アプリケーションを使ってみましょう。
+
+汎用ビューの詳細は、[汎用ビューのドキュメント](https://docs.djangoproject.com/ja/4.0/topics/class-based-views/) を参照してください。
+
+フォームや汎用ビューを使いこなせるようになったら、 チュートリアルその5 に進んで、投票アプリのテストについて学びましょう。
