@@ -21,7 +21,7 @@ pythonはインストールしている前提とします。
 4. 仮想環境にdjangoをインストール`pip install django` 
 5. 一応確認`pip freeze`
 
-# Lincense
+# License
 - 私が翻訳したファイルのコピー、改変、動画への利用は自由に行うことができます。ただし引用元を明記してください。
 - tutorial4以降の翻訳は気分で続けます。
 - 翻訳元の著作権は[python公式ドキュメント](https://docs.djangoproject.com/en/3.2/)に帰属します。
