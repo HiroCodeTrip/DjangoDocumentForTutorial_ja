@@ -24,5 +24,5 @@ pythonはインストールしている前提とします。
 # License
 - 私が翻訳したファイルのコピー、改変、動画への利用は自由に行うことができます。ただし引用元を明記してください。
 - tutorial4以降の翻訳は気分で続けます。
-- このレポジトリは基本的には[python公式ドキュメント](https://docs.djangoproject.com/en/3.2/)を元に作られています。
-- 翻訳元の著作権は[python公式ドキュメント](https://docs.djangoproject.com/en/3.2/)に帰属します。
+- このレポジトリは基本的には[Django公式ドキュメント](https://docs.djangoproject.com/en/3.2/)を元に作られています。
+- 翻訳元の著作権は[Django公式ドキュメント](https://docs.djangoproject.com/en/3.2/)に帰属します。
